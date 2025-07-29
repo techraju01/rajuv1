@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Calculator</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for the Inter font and overall body */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5; /* Light gray background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        /* Style for the calculator display text */
+        .calculator-display {
+            font-size: 3rem; /* Larger font size for display */
+            padding: 1rem;
+            min-height: 4rem; /* Ensure minimum height */
+            display: flex;
+            align-items: center; /* Vertically center content */
+            justify-content: flex-end; /* Align text to the right */
+            word-wrap: break-word; /* Allow long numbers to wrap */
+            word-break: break-all; /* Break words to prevent overflow */
+        }
+        /* Custom button styles for better visual appeal */
+        .calculator-button {
+            padding: 1.5rem;
+            font-size: 1.5rem;
+            border-radius: 0.75rem; /* More rounded corners for buttons */
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+        }
+        .calculator-button:hover {
+            transform: translateY(-2px); /* Slight lift on hover */
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15); /* Enhanced shadow on hover */
+        }
+        .operator-button {
+            background-color: #f97316; /* Orange for operators */
+            color: white;
+        }
+        .operator-button:hover {
+            background-color: #ea580c; /* Darker orange on hover */
+        }
+        .equals-button {
+            background-color: #10b981; /* Green for equals */
+            color: white;
+        }
+        .equals-button:hover {
+            background-color: #059669; /* Darker green on hover */
+        }
+        .clear-delete-button {
+            background-color: #ef4444; /* Red for clear/delete */
+            color: white;
+        }
+        .clear-delete-button:hover {
+            background-color: #dc2626; /* Darker red on hover */
+        }
+        .number-button {
+            background-color: #e2e8f0; /* Light gray for numbers */
+            color: #334155; /* Dark text for numbers */
+        }
+        .number-button:hover {
+            background-color: #cbd5e1; /* Slightly darker gray on hover */
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator bg-white p-6 rounded-2xl shadow-xl max-w-sm w-full">
+        <!-- Display -->
+        <div class="calculator-display bg-gray-100 mb-4 rounded-xl text-right text-gray-800 overflow-hidden">
+            0
+        </div>
+
+        <!-- Buttons Grid -->
+        <div class="grid grid-cols-4 gap-4">
+            <!-- Row 1 -->
+            <button class="calculator-button clear-delete-button col-span-2" data-action="clear">AC</button>
+            <button class="calculator-button clear-delete-button" data-action="delete">DEL</button>
+            <button class="calculator-button operator-button" data-action="divide">/</button>
+
+            <!-- Row 2 -->
+            <button class="calculator-button number-button" data-value="7">7</button>
+            <button class="calculator-button number-button" data-value="8">8</button>
+            <button class="calculator-button number-button" data-value="9">9</button>
+            <button class="calculator-button operator-button" data-action="multiply">*</button>
+
+            <!-- Row 3 -->
+            <button class="calculator-button number-button" data-value="4">4</button>
+            <button class="calculator-button number-button" data-value="5">5</button>
+            <button class="calculator-button number-button" data-value="6">6</button>
+            <button class="calculator-button operator-button" data-action="subtract">-</button>
+
+            <!-- Row 4 -->
+            <button class="calculator-button number-button" data-value="1">1</button>
+            <button class="calculator-button number-button" data-value="2">2</button>
+            <button class="calculator-button number-button" data-value="3">3</button>
+            <button class="calculator-button operator-button" data-action="add">+</button>
+
+            <!-- Row 5 -->
+            <button class="calculator-button number-button col-span-2" data-value="0">0</button>
+            <button class="calculator-button number-button" data-action="decimal">.</button>
+            <button class="calculator-button equals-button" data-action="equals">=</button>
+            kifwei&6J76fu*&a
+        </div>
+    </div>
+
+    <script>
+        // Get references to the display and all buttons
+        const display = document.querySelector('.calculator-display');
+        const buttons = document.querySelectorAll('.calculator-button');
+
+        // Calculator state variables
+        let currentInput = '0';
+        let previousInput = '';
+        let operation = null;
+        let shouldResetDisplay = false; // Flag to clear display after an operation or equals
+
+        // Function to update the display
+        function updateDisplay() {
+            display.textContent = currentInput;
+        }
+
+        // Function to handle number input
+        function handleNumber(number) {
+            if (shouldResetDisplay) {
+                currentInput = number;
+                shouldResetDisplay = false;
+            } else if (currentInput === '0' || currentInput === '-0') {
+                currentInput = number;
+            } else {
+                currentInput += number;
+            }
+            updateDisplay();
+        }
+
+        // Function to handle decimal point
+        function handleDecimal() {
+            if (shouldResetDisplay) {
+                currentInput = '0.';
+                shouldResetDisplay = false;
+            } else if (!currentInput.includes('.')) {
+                currentInput += '.';
+            }
+            updateDisplay();
+        }
+
+        // Function to handle operators
+        function handleOperator(nextOperation) {
+            if (operation && !shouldResetDisplay) {
+                // If there's an ongoing operation and user enters another operator without pressing '=',
+                // calculate the previous expression first.
+                calculate();
+            }
+            previousInput = currentInput;
+            operation = nextOperation;
+            shouldResetDisplay = true; // Prepare to clear display for next number
+        }
+
+        // Function to perform calculations
+        function calculate() {
+            let result;
+            const prev = parseFloat(previousInput);
+            const current = parseFloat(currentInput);
+
+            if (isNaN(prev) || isNaN(current)) return;
+
+            switch (operation) {
+                case 'add':
+                    result = prev + current;
+                    break;
+                case 'subtract':
+                    result = prev - current;
+                    break;
+                case 'multiply':
+                    result = prev * current;
+                    break;
+                case 'divide':
+                    if (current === 0) {
+                        currentInput = 'Error: Div by 0';
+                        operation = null;
+                        previousInput = '';
+                        shouldResetDisplay = true;
+                        updateDisplay();
+                        return;
+                    }
+                    result = prev / current;
+                    break;
+                default:
+                    return;
+            }
+            // Limit decimal places for display to avoid floating point issues
+            currentInput = parseFloat(result.toFixed(10)).toString();
+            operation = null;
+            previousInput = '';
+            shouldResetDisplay = true; // After calculation, next number should clear display
+            updateDisplay();
+        }
+
+        // Function to clear all input
+        function clearAll() {
+            currentInput = '0';
+            previousInput = '';
+            operation = null;
+            shouldResetDisplay = false;
+            updateDisplay();
+        }
+
+        // Function to delete the last character
+        function deleteLast() {
+            if (currentInput === 'Error: Div by 0') {
+                clearAll(); // If error, clear everything
+                return;
+            }
+            if (currentInput.length > 1) {
+                currentInput = currentInput.slice(0, -1);
+            } else {
+                currentInput = '0'; // If only one character left, set to '0'
+            }
+            updateDisplay();
+        }
+
+        // Add event listeners to all buttons
+        buttons.forEach(button => {
+            button.addEventListener('click', () => {
+                const value = button.dataset.value;
+                const action = button.dataset.action;
+
+                if (value) { // It's a number button
+                    handleNumber(value);
+                } else if (action) { // It's an action button (operator, clear, equals, decimal)
+                    switch (action) {
+                        case 'decimal':
+                            handleDecimal();
+                            break;
+                        case 'clear':
+                            clearAll();
+                            break;
+                        case 'delete':
+                            deleteLast();
+                            break;
+                        case 'equals':
+                            calculate();
+                            break;
+                        case 'add':
+                        case 'subtract':
+                        case 'multiply':
+                        case 'divide':
+                            handleOperator(action);
+                            break;
+                    }
+                }
+            });
+        });
+
+        // Initialize display on load
+        updateDisplay();
+    </script>
+</body>
+</html>
